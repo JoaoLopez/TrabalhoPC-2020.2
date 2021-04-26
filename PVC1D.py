@@ -52,9 +52,25 @@ def monta_matriz_D(n,p,q,h):
     [   .         .          .       .      .         .           .   ]    .
     [   :         :          :       :        .       :           :   ]    :
     [   0         0          0       0       ...   q+(2p/h²)    -p/h  ]   n-2
-    [   0         0          0       0       ...   -p/h      q+(2p/h²)]   n-1
-     """
-    pass
+    [   0         0          0       0       ...   -p/h       q+(p/h²)]   n-1
+    """
+    matriz = []
+    for i in range(n-1):
+        coluna = []
+        
+        for j in range(n-1):
+            if(i == j):
+                coluna.append(2*p/(h*h) + q)
+            elif(abs(i - j) == 1):
+                coluna.append(-p/(h*h))
+            else:
+                coluna.append(0)
+        
+        matriz.append(coluna)
+
+    matriz[-1][-1] = p/(h*h) + q
+    
+    return matriz
 
 def PVC_1D(n,p,q,h,funcao_f,y0,yn,pontos_dominio):
     """ Assumindo que a matriz do PVC aprox. por dif. finitas é dada por D
@@ -72,8 +88,22 @@ def PVC_1D(n,p,q,h,funcao_f,y0,yn,pontos_dominio):
     #retorna o produto matricial
     return D_inv.dot(F)
 
+while(True):
+    a = float(input("a: "))
+    b = float(input("b: "))
+    n = int(input("n: "))
+    p = float(input("p: "))
+    q = float(input("q: "))
+    h = (b-a)/n
 
+    print("DISCRETIZAÇÃO:")    
+    print(discretiza_dominio1D(a,b,n))
+    print("\n")
 
-print(discretiza_dominio1D(0,10,10))
+    matriz = monta_matriz_D(n, p, q, h)
+    print("MATRIZ:")
+    for linha in matriz:
+        print(linha)
+    print("\n\n")
 
 latex2sympy()
