@@ -3,9 +3,10 @@ from sympy import *
 from latex2sympy import *
 from numpy.linalg import inv
 import numpy as np
+from process_latex import *
 
-FFX=latex2sympy(r"\frac {1+ \sqrt {\a}} {\b}",ConfigL2S())
-FF = parsing.sympy_parser.parse_expr("(1*(1*(1*a)**0.5 + 1*1))/((1*b))")
+#FFX=latex2sympy(r"\frac {1+ \sqrt {\x}} {2}",ConfigL2S())
+#FF = parsing.sympy_parser.parse_expr("(1*(1*(1*a)**0.5 + 1*1))/((1*b))")
 
 
 #TESTADO OK
@@ -30,7 +31,12 @@ https://drive.google.com/file/d/1bzIc99DaNZOIob1cHPAraBw7MMCe2ECK/view?usp=shari
 
 def calcula_f(funcao_em_lateX,x_i):
     """"retorna f(x_i) = f_i ; dados o ponto x_i e a string da representação de f em LaTeX"""
-    pass
+    # exemplo : 0.5* ( √(x+1) ) → em latex → \frac {\sqrt{1+x}} {2}
+    FLX_no_ponto=funcao_em_lateX.replace("x",str(x_i))
+    FFX = latex2sympy(FLX_no_ponto, ConfigL2S())
+    valor = parsing.sympy_parser.parse_expr(str(FFX))
+    return valor
+    #pass
 
 def get_vetor_f(funcao_f,y0,yn,pontos_dominio,p,h,n):
     """"retorna o vetor f que contém os valores de f nos pontos do dominio discretizado"""
@@ -42,7 +48,7 @@ def get_vetor_f(funcao_f,y0,yn,pontos_dominio,p,h,n):
         resp.append(calcula_f(funcao_f,xk))
     return resp
 
-
+#OK
 def monta_matriz_D(n,p,q,h):
     """monta a matriz do PVC aproximado por diferenças finitas, dado o n, que vale...
     [ q+(2p/h²)     -p/h²     0      0       ...      0           0   ]    1
@@ -89,6 +95,8 @@ def PVC_1D(n,p,q,h,funcao_f,y0,yn,pontos_dominio):
     return D_inv.dot(F)
 
 while(True):
+    f_de_X=input("insira a função f(x) em LaTeX : ")
+    # \frac { \sqrt{x+1} }{3}
     a = float(input("a: "))
     b = float(input("b: "))
     n = int(input("n: "))
@@ -96,9 +104,15 @@ while(True):
     q = float(input("q: "))
     h = (b-a)/n
 
-    print("DISCRETIZAÇÃO:")    
-    print(discretiza_dominio1D(a,b,n))
+    print("DISCRETIZAÇÃO:")
+    X=discretiza_dominio1D(a,b,n)
+    print(X)
+    print("CALCULANDO VETOR Y")
+    Y=[]
+    for x_i in X:
+        Y.append(calcula_f(f_de_X,x_i))
     print("\n")
+    print(Y)
 
     matriz = monta_matriz_D(n, p, q, h)
     print("MATRIZ:")
@@ -106,4 +120,7 @@ while(True):
         print(linha)
     print("\n\n")
 
-latex2sympy()
+
+
+
+#latex2sympy()
