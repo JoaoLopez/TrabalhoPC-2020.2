@@ -1,9 +1,10 @@
-
+import math
 from sympy import *
+from sympy.parsing.latex import parse_latex
 from latex2sympy import *
 from numpy.linalg import inv
 import numpy as np
-from process_latex import *
+#from process_latex import *
 
 #FFX=latex2sympy(r"\frac {1+ \sqrt {\x}} {2}",ConfigL2S())
 #FF = parsing.sympy_parser.parse_expr("(1*(1*(1*a)**0.5 + 1*1))/((1*b))")
@@ -28,15 +29,21 @@ https://drive.google.com/file/d/1bzIc99DaNZOIob1cHPAraBw7MMCe2ECK/view?usp=shari
     x.append(b)
     return x
 
-# falta funcionar com funções trigonométricas
-def calcula_f(funcao_em_lateX,x_i):
-    """"retorna f(x_i) = f_i ; dados o ponto x_i e a string da representação de f em LaTeX"""
+#DEPRECIADO
+def calcula_f_OLD(funcao_em_lateX,x_i):
+    """"[DEPRECIADO] retorna f(x_i) = f_i ; dados o ponto x_i e a string da representação de f em LaTeX"""
     # exemplo : 0.5* ( √(x+1) ) → em latex → \frac {\sqrt{1+x}} {2}
     FLX_no_ponto=funcao_em_lateX.replace("x",str(x_i))
     FFX = latex2sympy(FLX_no_ponto, ConfigL2S())
     valor = parsing.sympy_parser.parse_expr(str(FFX))
     return valor
     #pass
+
+# TESTADO OK
+def calcula_f(funcao_em_lateX,x_i):
+    """"retorna f(x_i) = f_i ; dados o ponto x_i e a string da representação de f em LaTeX"""
+    # exemplo : arctg(x) + sen²(x) + 0.5* ( √(x+1) ) → em latex → \arctan{x} + (\sin{x})^{2}) + \frac {\sqrt{1+x}} {2}
+    return parse_latex(funcao_em_lateX).evalf(subs=dict(x=x_i))
 
 #VERIFICAR PARTE TEÓRICA (SE ESTÁ PEGANDO OS VALORES QUE DEVERIA SEGUNDO O SIDE)
 def get_vetor_f(funcao_f,y0,pontos_dominio,p,h,n):
@@ -105,6 +112,12 @@ def imp_mat(m):
 def retorna_f(funcao_em_lateX):
     """"retorna f(x) ; dada a string da representação de f em LaTeX"""
     # exemplo : 0.5* ( √(x+1) ) → em latex → \frac {\sqrt{1+x}} {2}
+    return parse_latex(funcao_em_lateX)
+
+#DEPRECIADO
+def retorna_f_old(funcao_em_lateX):
+    """"retorna f(x) ; dada a string da representação de f em LaTeX"""
+    # exemplo : 0.5* ( √(x+1) ) → em latex → \frac {\sqrt{1+x}} {2}
     #FLX_no_ponto=
     FFX = latex2sympy(funcao_em_lateX, ConfigL2S())
     valor = parsing.sympy_parser.parse_expr(str(FFX))
@@ -126,7 +139,8 @@ def verifica_condicoes_problema(a,b,n,f_de_x):
         print("[ERRO] intervalo deve ser dividido pelo menos em 3 partes! n deve ser maior q 2!")
         exit(1)
     try:
-        if str(calcula_f(f_de_x,a))=="zoo":
+        fA=calcula_f(f_de_x,a)
+        if str(fA)=="zoo" or str(fA).find("*I")>=0:
             print("[ERRO] a função f(x) =", f_de_x, 'não faz sentido no ponto (', a, ')')
             exit(1)
 #        print(str(calcula_f(f_de_x,a)))
@@ -134,8 +148,8 @@ def verifica_condicoes_problema(a,b,n,f_de_x):
         print("[ERRO] a função f(x) =",f_de_x,'não faz sentido no ponto (',a,')',e)
         exit(1)
     try:
-        #print(str((calcula_f(f_de_x,b))))
-        if str(calcula_f(f_de_x,b))=="zoo":
+        fA=calcula_f(f_de_x,b)
+        if str(fA)=="zoo" or str(fA).find("*I")>=0:
             print("[ERRO] a função f(x) =", f_de_x, 'não faz sentido no ponto (', b, ')')
             exit(1)
     except Exception as e:
@@ -154,27 +168,42 @@ def verifica_condicoes_problema(a,b,n,f_de_x):
         else:
             print("""[OK!] → """,a,"""= a ≠ b=""",b,"""
         → n > 2
-        → existe f(a) e f(b)
-        → Existe d²f/dx² ; d²f/dx²=""",d2f_dx2)
+        → existe f(a) e f(b), f(a)=""",calcula_f(f_de_x,a),""" f(b)=""",calcula_f(f_de_x,b),"""
+        → Existe d²f/dx² ; d²f/dx²=""",d2f_dx2,
+    """ 
+    → f(x) = """,f)
     except Exception as e:
         print("[ERRO] não existe d²f/dx² (derivada segunda) para a função f(x)=", f_de_x,
               "violando as condições do problema",e)
         exit(1)
 
+def input_num(msg):
+    t=input(msg)
+    if t.lower()=="pi":
+        return math.pi
+    elif t.lower()=="e" or t.lower()=="exp":
+        return math.e
+    else :
+        return float(t)
 
 
 while(True):
     f_de_X=input("insira a função f(x) em LaTeX : ")
     # \frac {( \sqrt{x-1})^3 } {x}
-    a = float(input("a: "))
-    b = float(input("b: "))
-    n = int(input("n: "))
-    p = float(input("p: "))
-    q = float(input("q: "))
-    y_0 = input("y(a): ")
-#    y_n = input("y(n): ")  ##ESTE VALOR É DADO PELO PROBLEMA ???
-    h = (b-a)/n
 
+    a = input_num("a: ")
+    b = input_num("b: ")
+    n = int(input("n: "))
+    p = input_num("p: ")
+    q = input_num("q: ")
+    y_0 = input_num("y(a): ")
+    dy_dx_b = input("dy/dx (b): ")  ##ESTE VALOR É DADO PELO PROBLEMA ???
+    h = (b-a)/n
+    fun=retorna_f(f_de_X)
+    print("""Sistema em questão :
+           { -""",p,"""dy/dx + """,q,"""y =""",fun,"""
+           { y(""",a,""")=""",y_0,"""
+           { dy/dx (""",b,""")=""",dy_dx_b)
     print('\n Verificando condições do problema')
     verifica_condicoes_problema(a, b, n, f_de_X)
 
