@@ -16,6 +16,7 @@
 - sympy: pip install sympy
 - numpy: pip install numpy
 - latex2sympy: pip install latex2sympy
+- antlr4-python3-runtime: pip install antlr4-python3-runtime
 
 ### Para executar o método das diferenças finitas PVC: 
 
