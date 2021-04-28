@@ -46,18 +46,18 @@ def calcula_f(funcao_em_lateX,x_i):
     return parse_latex(funcao_em_lateX).evalf(subs=dict(x=x_i))
 
 #VERIFICAR PARTE TEÓRICA (SE ESTÁ PEGANDO OS VALORES QUE DEVERIA SEGUNDO O SIDE)
-def get_vetor_f(funcao_f,y0,pontos_dominio,p,h,n):
+def get_vetor_f(funcao_f, y0, pontos_dominio, funcao_p, h, n):
     """"retorna o vetor f que contém os valores de f nos pontos do dominio discretizado"""
     # primeiro valor é f_1 + y0*p/h²
-    resp=[calcula_f(funcao_f,pontos_dominio[1])+(p*y0/(h**2))]
+    resp = [calcula_f(funcao_f, pontos_dominio[1]) + (calcula_f(funcao_p, pontos_dominio[1]) * y0 / (h ** 2))]
     #itera sobre os pontos xk do dominio , calcula f(xk) e guarda no vetor
     for k in range(2,n):
         xk=pontos_dominio[k]
         resp.append(calcula_f(funcao_f,xk))
     return resp
 
-#OK
-def monta_matriz_D(n,p,q,h):
+#DEPRECIADO
+def monta_matriz_D_old(n,p,q,h):
     """monta a matriz do PVC aproximado por diferenças finitas, dado o n, que vale...
     [ q+(2p/h²)     -p/h²     0      0       ...      0           0   ]    1
     [ -p/h²      q+(2p/h²)   -p/h²   0       ...      0           0   ]    2
@@ -78,12 +78,46 @@ def monta_matriz_D(n,p,q,h):
             elif(abs(i - j) == 1):
                 coluna.append(-p/(h*h))
             else:
-                coluna.append(0)
+                coluna.append(float(0))
         
         matriz.append(coluna)
 
     matriz[-1][-1] = p/(h*h) + q
     
+    return matriz
+
+def monta_matriz_D(qtd_intervalos, fun_p, fun_q, step, inicio_dominio):
+    """monta a matriz do PVC aproximado por diferenças finitas, dado o n, que vale...
+    [ q+(2p/h²)     -p/h²     0      0       ...      0           0   ]    1
+    [ -p/h²      q+(2p/h²)   -p/h²   0       ...      0           0   ]    2
+    [   0        -p/h²    q+(2p/h²) -p/h²    ...      0           0   ]    3
+    [   0         0         -p/h²  q+(2p/h²) ...      0           0   ]    4
+    [   .         .          .       .      .         .           .   ]    .
+    [   :         :          :       :        .       :           :   ]    :
+    [   0         0          0       0       ...   q+(2p/h²)    -p/h  ]   n-2
+    [   0         0          0       0       ...   -p/h       q+(p/h²)]   n-1
+    """
+    matriz = []
+    for i in range(qtd_intervalos-1):
+        coluna = []
+        valor_x = (i * step) + inicio_dominio
+        valor_p_em_x = calcula_f(fun_p, valor_x)
+        valor_q_em_x = calcula_f(fun_q, valor_x)
+
+        for j in range(qtd_intervalos-1):
+            if(i == j):
+                coluna.append((2 * valor_p_em_x/(step*step)) + valor_q_em_x)
+
+            elif(abs(i - j) == 1):
+                coluna.append(-valor_p_em_x/(step*step))
+
+            else:
+                coluna.append(0)
+
+        matriz.append(coluna)
+
+    matriz[-1][-1] = calcula_f(fun_p, inicio_dominio + (qtd_intervalos - 2) * step)/(step*step) + calcula_f(fun_q, inicio_dominio + (qtd_intervalos - 2) * step)
+
     return matriz
 
 #TESTADO OK
@@ -98,8 +132,8 @@ def PVC_1D(D,F):#,n,p,q,h,funcao_f,y0,yn,pontos_dominio):
        Y=(D-¹)F
        E ASSIM TEREMOS A SOLUÇÃO
        """
-    D_inv=inv(np.matrix(np.array(D)))#monta_matriz_D(n,p,q,h))))  #calcula a inversa
-    F_t=np.transpose(F)#get_vetor_f(funcao_f,y0,yn,pontos_dominio,p,h,n))  #obtem o vetor vertical F
+    D_inv = inv(np.matrix(np.array(D), dtype='float'))#monta_matriz_D(n,p,q,h))))  #calcula a inversa
+    F_t = np.transpose(F)#get_vetor_f(funcao_f,y0,yn,pontos_dominio,p,h,n))  #obtem o vetor vertical F
     #retorna o produto matricial
     return D_inv.dot(F_t)
 
@@ -194,10 +228,10 @@ while(True):
     inicio_dominio = input_num("Início de domínio (a): ")
     final_dominio = input_num("Final de domínio (b): ")
     qtd_sub_intervalos = int(input("Qtd. de sub-intervalos (n): "))
-    p_de_X = input_num("Insira a função p(x) em LaTeX: ")
-    q_de_X = input_num("Insira a função q(x) em LaTeX: ")
+    p_de_X = input("Insira a função p(x) em LaTeX: ")
+    q_de_X = input("Insira a função q(x) em LaTeX: ")
     y_0 = input_num("Valor de y(a): ")
-    dy_dx_b = input("Valor de dy/dx (b): ")  ##ESTE VALOR É DADO PELO PROBLEMA ???
+    dy_dx_b = input_num("Valor de dy/dx (b): ")  ##ESTE VALOR É DADO PELO PROBLEMA ???
     h = (final_dominio - inicio_dominio) / qtd_sub_intervalos
     fun_F = retorna_f(f_de_X)
     fun_P = retorna_f(p_de_X)
@@ -217,13 +251,13 @@ while(True):
     print("\n")
 
     print("CALCULANDO VETOR F:")
-    vetor_F = get_vetor_f(f_de_X, y_0, dominio, p_de_X, h, qtd_sub_intervalos) # usar y_0 ao invés de a
+    vetor_F = get_vetor_f(f_de_X, y_0, dominio, p_de_X, h, qtd_sub_intervalos) # usar y_0 ao invés de início de domínio
     #for x_i in X:
     #    Y.append(calcula_f(f_de_X,x_i))
     print(vetor_F)
     print("\n")
 
-    matriz = monta_matriz_D(qtd_sub_intervalos, p_de_X, q_de_X, h)
+    matriz = monta_matriz_D(qtd_sub_intervalos, p_de_X, q_de_X, h, inicio_dominio)
     print("MATRIZ:")
     imp_mat(matriz)
 #    for linha in matriz:
