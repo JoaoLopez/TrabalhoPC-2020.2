@@ -13,12 +13,12 @@ import numpy as np
 #TESTADO OK
 def discretiza_dominio1D(a,b,n):
     '''Dado um dominio delimitado pelo intervalo (a,b)
-discretiza esse domínio, dividindo ele em n pontos equidistantes
-ou seja, dado um dominio [a,b] , e um valor n retorna os n pontos
-desse domínio cuja distancia entre eles, é (a-b)/n ; incluindo a e b
-visão gráfica em :
-https://drive.google.com/file/d/1bzIc99DaNZOIob1cHPAraBw7MMCe2ECK/view?usp=sharing
-'''
+    discretiza esse domínio, dividindo ele em n pontos equidistantes
+    ou seja, dado um dominio [a,b] , e um valor n retorna os n pontos
+    desse domínio cuja distancia entre eles, é (a-b)/n ; incluindo a e b
+    visão gráfica em :
+    https://drive.google.com/file/d/1bzIc99DaNZOIob1cHPAraBw7MMCe2ECK/view?usp=sharing
+    '''
     if n<=1:
         return None
     # tem q ter pelo menos 2 pontos
@@ -132,15 +132,15 @@ def verifica_condicoes_problema(a,b,n,f_de_x):
     → f deve fazer sentido em a e b
     → deve existir d²f/dx² (derivada segunda) para a função f
     """
-    if a==b:
+    if a == b:
         print("[ERRO] Intervalo Vazio! a=b")
         exit(1)
-    if n<=2 :
+    if n <= 2 :
         print("[ERRO] intervalo deve ser dividido pelo menos em 3 partes! n deve ser maior q 2!")
         exit(1)
     try:
-        fA=calcula_f(f_de_x,a)
-        if str(fA)=="zoo" or str(fA).find("*I")>=0:
+        fA = calcula_f(f_de_x, a)
+        if str(fA) == "zoo" or str(fA).find("*I") >= 0:
             print("[ERRO] a função f(x) =", f_de_x, 'não faz sentido no ponto (', a, ')')
             exit(1)
 #        print(str(calcula_f(f_de_x,a)))
@@ -148,33 +148,33 @@ def verifica_condicoes_problema(a,b,n,f_de_x):
         print("[ERRO] a função f(x) =",f_de_x,'não faz sentido no ponto (',a,')',e)
         exit(1)
     try:
-        fA=calcula_f(f_de_x,b)
-        if str(fA)=="zoo" or str(fA).find("*I")>=0:
+        fA = calcula_f(f_de_x, b)
+        if str(fA) == "zoo" or str(fA).find("*I") >= 0:
             print("[ERRO] a função f(x) =", f_de_x, 'não faz sentido no ponto (', b, ')')
             exit(1)
     except Exception as e:
-        print("[ERRO] a função f(x) =",f_de_x,'não faz sentido no ponto (',b,')',e)
+        print("[ERRO] a função f(x) =", f_de_x, 'não faz sentido no ponto (', b, ')', e)
         exit(1)
     # CONDIÇÃO PRO PVC1D : Se existe a derivada segunda de f então existe a derivada quarta de y
     # logo vale o problema
-    f=retorna_f(f_de_x)
-    x=symbols("x")
-    d2f_dx2=None
+    f = retorna_f(f_de_x)
+    x = symbols("x")
+    d2f_dx2 = None
     try:
-        d2f_dx2=diff(diff(f,x),x)
-        if (not d2f_dx2) or (str(d2f_dx2)=='zoo'):
-            print("[ERRO] não existe d²f/dx² (derivada segunda) para a função f(x)=",f_de_x,"violando as condições do problema")
+        d2f_dx2 = diff(diff(f, x), x)
+        if (not d2f_dx2) or (str(d2f_dx2) == 'zoo'):
+            print("[ERRO] não existe d²f/dx² (derivada segunda) para a função f(x)=", f_de_x, "violando as condições do problema")
             exit(1)
         else:
-            print("""[OK!] → """,a,"""= a ≠ b=""",b,"""
+            print("""[OK!] → """, a, """= a ≠ b=""", b, """
         → n > 2
-        → existe f(a) e f(b), f(a)=""",calcula_f(f_de_x,a),""" f(b)=""",calcula_f(f_de_x,b),"""
-        → Existe d²f/dx² ; d²f/dx²=""",d2f_dx2,
+        → existe f(a) e f(b), f(a)=""", calcula_f(f_de_x, a), """ f(b)=""", calcula_f(f_de_x, b), """
+        → Existe d²f/dx² ; d²f/dx²=""", d2f_dx2,
     """ 
-    → f(x) = """,f)
+    → f(x) = """, f)
     except Exception as e:
         print("[ERRO] não existe d²f/dx² (derivada segunda) para a função f(x)=", f_de_x,
-              "violando as condições do problema",e)
+              "violando as condições do problema", e)
         exit(1)
 
 def input_num(msg):
@@ -188,49 +188,53 @@ def input_num(msg):
 
 
 while(True):
-    f_de_X=input("insira a função f(x) em LaTeX : ")
+    f_de_X = input("Insira a função f(x) em LaTeX: ")
     # \frac {( \sqrt{x-1})^3 } {x}
 
-    a = input_num("a: ")
-    b = input_num("b: ")
-    n = int(input("n: "))
-    p = input_num("p: ")
-    q = input_num("q: ")
-    y_0 = input_num("y(a): ")
-    dy_dx_b = input("dy/dx (b): ")  ##ESTE VALOR É DADO PELO PROBLEMA ???
-    h = (b-a)/n
-    fun=retorna_f(f_de_X)
+    inicio_dominio = input_num("Início de domínio (a): ")
+    final_dominio = input_num("Final de domínio (b): ")
+    qtd_sub_intervalos = int(input("Qtd. de sub-intervalos (n): "))
+    p_de_X = input_num("Insira a função p(x) em LaTeX: ")
+    q_de_X = input_num("Insira a função q(x) em LaTeX: ")
+    y_0 = input_num("Valor de y(a): ")
+    dy_dx_b = input("Valor de dy/dx (b): ")  ##ESTE VALOR É DADO PELO PROBLEMA ???
+    h = (final_dominio - inicio_dominio) / qtd_sub_intervalos
+    fun_F = retorna_f(f_de_X)
+    fun_P = retorna_f(p_de_X)
+    fun_Q = retorna_f(q_de_X)
+
     print("""Sistema em questão :
-           { -""",p,"""dy/dx + """,q,"""y =""",fun,"""
-           { y(""",a,""")=""",y_0,"""
-           { dy/dx (""",b,""")=""",dy_dx_b)
-    print('\n Verificando condições do problema')
-    verifica_condicoes_problema(a, b, n, f_de_X)
+           { -""", fun_P, """dy/dx + """, fun_Q, """y =""", fun_F, """
+           { y(""", inicio_dominio, """)=""", y_0, """
+           { dy/dx (""", final_dominio, """)=""", dy_dx_b)
+
+    print('\n Verificando condições do problema:')
+    verifica_condicoes_problema(inicio_dominio, final_dominio, qtd_sub_intervalos, f_de_X)
 
     print("\nDISCRETIZAÇÃO:")
-    X=discretiza_dominio1D(a,b,n)
-    print(X)
+    dominio = discretiza_dominio1D(inicio_dominio, final_dominio, qtd_sub_intervalos)
+    print(dominio)
     print("\n")
 
-    print("CALCULANDO VETOR Y")
-    F=get_vetor_f(f_de_X,a,X,p,h,n)
+    print("CALCULANDO VETOR F:")
+    vetor_F = get_vetor_f(f_de_X, y_0, dominio, p_de_X, h, qtd_sub_intervalos) # usar y_0 ao invés de a
     #for x_i in X:
     #    Y.append(calcula_f(f_de_X,x_i))
-    print(F)
+    print(vetor_F)
     print("\n")
 
-    matriz = monta_matriz_D(n, p, q, h)
+    matriz = monta_matriz_D(qtd_sub_intervalos, p_de_X, q_de_X, h)
     print("MATRIZ:")
     imp_mat(matriz)
 #    for linha in matriz:
 #        print(linha)
     print("\n\n")
 
-    print("SOLUCIONANDO PROBLEMA")
-    Y=PVC_1D(matriz,F)
-    print('vetor Y=',Y)
+    print("SOLUCIONANDO PROBLEMA:")
+    vetor_Y = PVC_1D(matriz, vetor_F)
+    print('VETOR Y=', vetor_Y)
 
-    print("-"*50,'\n')
+    print("-" * 50, '\n')
 
 
 #
