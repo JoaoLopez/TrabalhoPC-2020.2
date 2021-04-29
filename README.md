@@ -24,21 +24,36 @@
 
 Consultar arquivo latexcheatsheet.pdf para um guia rápido da representação utilizada neste projeto.  
 
-## Caso de teste
+## Casos de teste
+- teste 1
+  f(x) em LaTeX : (0.5*(\sqrt{1+x})) + \arctan{x} + ((\sin{x})^{2}) \n
 
-f(x) em LaTeX : (0.5*(\sqrt{1+x})) + \arctan{x} + ((\sin{x})^{2}) \n
+  a: -1
 
-a: -1
+  b: 2
 
-b: 2
+  n: 9
 
-n: 9
+  p: 1
 
-p: 1
+  q: 2
 
-q: 2
+  y(a): 0
 
-y(a): 0
+  dy/dx (b): -0.111
+- teste 2 (exemplo mostrado em  : https://www.ufrgs.br/reamat/CalculoNumerico/livro-sci/pdvdc-metodo_de_diferencas_finitas.html )
+  f(x) em LaTeX : \exp{-x}
 
-dy/dx (b): -0.111
+  a: 0.5
 
+  b: 1.5
+
+  n: 10
+
+  p: -1
+
+  q: 1
+
+  y(a): 1
+
+  dy/dx (b): 2
